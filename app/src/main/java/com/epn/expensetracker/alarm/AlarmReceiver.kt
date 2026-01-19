@@ -30,41 +30,32 @@ class AlarmReceiver : BroadcastReceiver() {
         val notificationManager = context
             .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Crear el canal (obligatorio desde Android 8.0)
+        // ID del canal (Cámbialo si ya lo habías probado antes para forzar cambios)
+        val CHANNEL_ID = "EXPENSE_TRACKER_CH"
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val canal = NotificationChannel(
                 CHANNEL_ID,
                 "Recordatorios",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_HIGH // IMPORTANCE_HIGH activa sonido
             ).apply {
                 description = "Recordatorios diarios de gastos"
                 enableVibration(true)
+                // Patrón: 0ms espera, 500ms vibra, 200ms espera, 500ms vibra
+                vibrationPattern = longArrayOf(0, 500, 200, 500)
             }
             notificationManager.createNotificationChannel(canal)
         }
 
-        // Intent para abrir la app al tocar la notificación
-        val openIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            openIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notificacion = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("¿Registraste tus gastos?")
-            .setContentText("No olvides anotar lo que gastaste hoy")
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // Asegúrate de que este recurso exista
+            .setContentTitle("Expense Tracker")
+            .setContentText("¡Es hora de registrar tus gastos del día!")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL) // Usa sonido y vibración por defecto
             .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .build()
 
-        notificationManager.notify(NOTIFICATION_ID, notificacion)
+        notificationManager.notify(1, builder.build())
     }
 
     companion object {
